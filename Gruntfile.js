@@ -9,7 +9,7 @@ module.exports = function(grunt) {
 				watch: true,
 				keepAlive: true,
 				files: {
-					'dist/browser/jsexpr.js': ['jsexpr.js']
+					'dist/browser/jsexpr.js': ['browser.js']
 				}
 			}
 		},
