@@ -1,0 +1,18 @@
+{
+  "name": "jsexpr",
+  "version": "0.0.1",
+  "description": "String and JSON template interpolation",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "JSON",
+    "String",
+    "interpolation",
+    "template",
+    "eval"
+  ],
+  "author": "David Gómez Matarrodona <solzimer@gmail.com>",
+  "license": "MIT"
+}
