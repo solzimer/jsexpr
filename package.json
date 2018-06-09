@@ -1,7 +1,7 @@
 {
   "name": "jsexpr",
   "version": "0.0.1",
-  "description": "String and JSON template interpolation",
+  "description": "String and JSON expression interpolator and evaluator",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -11,8 +11,13 @@
     "String",
     "interpolation",
     "template",
-    "eval"
+		"parser",
+    "eval",
+		"evaluation"		
   ],
   "author": "David Gómez Matarrodona <solzimer@gmail.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "extend": "^3.0.1"
+  }
 }
