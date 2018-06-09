@@ -1,6 +1,6 @@
 {
   "name": "jsexpr",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "String and JSON expression interpolator and evaluator. Interpolates or evaluates a string against a json object, or transforms an object into another based on a json template",
   "main": "index.js",
   "scripts": {
@@ -11,9 +11,9 @@
     "String",
     "interpolation",
     "template",
-		"parser",
+    "parser",
     "eval",
-		"evaluation"
+    "evaluation"
   ],
   "author": "David Gómez Matarrodona <solzimer@gmail.com>",
   "license": "MIT",
