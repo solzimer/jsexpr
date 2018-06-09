@@ -3,10 +3,10 @@ const expression = require('../');
 var fn = expression.fn("(${host}=='mymachine' || ${host}=='yourmachine') && ${appName}=='su'");
 var expr = expression.expr("/var/${date}/${client.address}/file.log");
 var jsexpr = expression.expr({
-	time : "${caca}/${de.vaca}",
+	time : "${client}/${address.host}:${address.port}",
 	data : {
-		tengo : {
-			una : "${motocicleta}"
+		request : {
+			headers : "${headers}"
 		}
 	}
 });
@@ -14,9 +14,10 @@ var jsexpr = expression.expr({
 console.log(fn({host:"mymachine",appName:23}));
 console.log(expr({date:"2017-01-01",client:{address:"localhost"}}));
 console.log(jsexpr({
-	caca : "soy caca",
-	de : {
-		vaca : true
+	client : "HOST001",
+	address : {
+		host : "localhost",
+		port : 8080
 	},
-	motocicleta : 514
+	headers : "Content-Type: application/json"
 }));
