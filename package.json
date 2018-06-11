@@ -1,11 +1,11 @@
 {
   "name": "jsexpr",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "String and JSON expression interpolator and evaluator. Interpolates or evaluates a string against a json object, or transforms an object into another based on a json template",
   "main": "dist/node/index.js",
-	"scripts": {
+  "scripts": {
     "test-debug": "mocha --inspect-brk",
-		"test": "mocha"
+    "test": "mocha"
   },
   "keywords": [
     "JSON",
