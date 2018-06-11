@@ -6,16 +6,15 @@ var extend = require("extend");
 var RX = /\$\{[^\}]+\}/g;
 
 function _val(obj, key) {
-	var arr = key.split(".");
-	arr.forEach(function (key) {
-		if (obj == null || obj == undefined) return;else obj = obj[key];
-	});
-
-	return obj || undefined;
+	try {
+		return eval("this." + key);
+	} catch (err) {
+		return undefined;
+	}
 }
 
 function val(obj, key) {
-	var v = _val(obj, key);
+	var v = _val.call(obj, obj, key);
 	return v === undefined ? "" : v;
 }
 

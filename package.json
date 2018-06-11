@@ -4,7 +4,6 @@
   "description": "String and JSON expression interpolator and evaluator. Interpolates or evaluates a string against a json object, or transforms an object into another based on a json template",
   "main": "dist/node/index.js",
   "scripts": {
-    "test-debug": "mocha --inspect-brk",
     "test": "mocha"
   },
   "keywords": [
