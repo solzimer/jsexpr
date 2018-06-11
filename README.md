@@ -1,4 +1,7 @@
 # jsexpr
+JSON Expressions!
+
+[![Build Status](https://travis-ci.org/solzimer/jsexpr.svg?branch=master)](https://travis-ci.org/solzimer/jsexpr)
 
 String and JSON expression interpolator and evaluator. Interpolates or evaluates a string against a json object, or transforms an object into another based on a json template.
 
