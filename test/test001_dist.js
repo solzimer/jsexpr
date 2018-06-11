@@ -1,5 +1,5 @@
 const
-	expression = require("../lib/expression"),
+	expression = require("../"),
 	assert = require('assert');
 
 describe('Expression parser', function() {
