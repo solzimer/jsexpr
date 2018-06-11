@@ -141,6 +141,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 		module.exports = {
 			fn: parse,
+			eval: parse,
 			expr: function expr(input) {
 				if ((typeof input === "undefined" ? "undefined" : _typeof(input)) == "object") return jsontokens(input);else return tokens(input);
 			}

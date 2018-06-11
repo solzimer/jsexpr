@@ -101,6 +101,7 @@ function jsontokens(json) {
 
 module.exports = {
 	fn: parse,
+	eval: parse,
 	expr: function expr(input) {
 		if ((typeof input === "undefined" ? "undefined" : _typeof(input)) == "object") return jsontokens(input);else return tokens(input);
 	}
