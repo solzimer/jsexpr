@@ -1,5 +1,5 @@
 const
-	expression = require("../"),
+	expression = require("../dist/node"),
 	assert = require('assert');
 
 describe('Expression parser', function() {
