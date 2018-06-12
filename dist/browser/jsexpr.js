@@ -44,6 +44,18 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 	}, { "./lib/expression": 3 }], 3: [function (require, module, exports) {
 		var extend = require("extend");
 		var RX = /\$\{[^\}]+\}/g;
+		var RX_RPL_PARSE = /[\$\{\}]/g;
+		var RX_RPL_TOKEN = /\$|\{|\}/g;
+
+		var CACHE = {};
+
+		function cacheeval(obj, key) {
+			if (!CACHE[key]) {
+				var fn = eval("(function(){\n\t\t\treturn function() {\n\t\t\t\ttry {\n\t\t\t\t\treturn this." + key + ";\n\t\t\t\t}catch(err) {\n\t\t\t\t\treturn undefined;\n\t\t\t\t}\n\t\t\t}\n\t\t})()");
+				CACHE[key] = fn;
+			}
+			return CACHE[key].call(obj);
+		}
 
 		function fneval(obj, key) {
 			try {
@@ -54,7 +66,11 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 		}
 
 		var EVALS = {
-			itval: function itval(obj, key) {
+			eval: function _eval(obj, key) {
+				var v = fneval.call(obj, obj, key);
+				return v === undefined ? "" : v;
+			},
+			iteval: function iteval(obj, key) {
 				var arr = key.split(".");
 				arr.forEach(function (key) {
 					if (obj == null || obj == undefined) return;else obj = obj[key];
@@ -63,8 +79,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 				var v = obj || undefined;
 				return v === undefined ? "" : v;
 			},
-			eval: function _eval(obj, key) {
-				var v = fneval.call(obj, obj, key);
+			ceval: function ceval(obj, key) {
+				var v = cacheeval(obj, key);
 				return v === undefined ? "" : v;
 			},
 			valwalk: function valwalk(src, ops, path) {
@@ -79,11 +95,11 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 		};
 
 		function parse(expr, method) {
-			method = method || "eval";
+			method = method || "ceval";
 			var m = expr.match(RX);
 			if (m) {
 				m.forEach(function (token) {
-					var key = token.replace(/[\$\{\}]/g, "").trim();
+					var key = token.replace(RX_RPL_PARSE, "").trim();
 					expr = expr.replace(token, "__val(entry,'" + key + "')");
 				});
 			}
@@ -95,7 +111,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 		}
 
 		function tokens(expr, method) {
-			method = method || "eval";
+			method = method || "ceval";
 			if (expr == "${JSON}") return function (entry) {
 				return JSON.stringify(entry, null, 2);
 			};
@@ -108,7 +124,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 				expr = expr.substring(idx + token.length);
 				list.push(t);
 				list.push(function (entry) {
-					return EVALS[method](entry, token.replace(/\$|\{|\}/g, ""));
+					return EVALS[method](entry, token.replace(RX_RPL_TOKEN, ""));
 				});
 			});
 			list.push(expr);

@@ -11,7 +11,11 @@ suite.
 	  fn({a:20,b:{c:15},d:{e:50}});
 	}).
 	add('itval', function() {
-		let fn = expression.eval("(${a} + ${b.c}) / ${d.e}","itval")
+		let fn = expression.eval("(${a} + ${b.c}) / ${d.e}","iteval")
+	  fn({a:20,b:{c:15},d:{e:50}});
+	}).
+	add('ceval', function() {
+		let fn = expression.eval("(${a} + ${b.c}) / ${d.e}","ceval")
 	  fn({a:20,b:{c:15},d:{e:50}});
 	}).
 	on('cycle', function(event) {

@@ -1,4 +1,4 @@
-const expression = require('./');
+const expression = require('../../dist/node');
 
 var fn = expression.fn("(${host}=='mymachine' || ${host}=='yourmachine') && ${appName}=='su'");
 var expr = expression.expr("/var/${date}/${client.address}/file.log");
