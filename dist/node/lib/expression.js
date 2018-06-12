@@ -5,7 +5,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 var extend = require("extend");
 var RX = /\$\{[^\}]+\}/g;
 
-function _val(obj, key) {
+function fneval(obj, key) {
 	try {
 		return eval("this." + key);
 	} catch (err) {
@@ -13,22 +13,33 @@ function _val(obj, key) {
 	}
 }
 
-function val(obj, key) {
-	var v = _val.call(obj, obj, key);
-	return v === undefined ? "" : v;
-}
+var EVALS = {
+	itval: function itval(obj, key) {
+		var arr = key.split(".");
+		arr.forEach(function (key) {
+			if (obj == null || obj == undefined) return;else obj = obj[key];
+		});
 
-function valwalk(src, ops, path) {
-	if (!src) return src;
-	Object.keys(src).forEach(function (k) {
-		var newpath = "" + path + (path ? '.' : '') + k;
-		if (ops[newpath]) src[k] = ops[newpath];
-		if (_typeof(src[k]) == "object") valwalk(src[k], ops, newpath);
-	});
-	return src;
-}
+		var v = obj || undefined;
+		return v === undefined ? "" : v;
+	},
+	eval: function _eval(obj, key) {
+		var v = fneval.call(obj, obj, key);
+		return v === undefined ? "" : v;
+	},
+	valwalk: function valwalk(src, ops, path) {
+		if (!src) return src;
+		Object.keys(src).forEach(function (k) {
+			var newpath = "" + path + (path ? '.' : '') + k;
+			if (ops[newpath]) src[k] = ops[newpath];
+			if (_typeof(src[k]) == "object") EVALS.valwalk(src[k], ops, newpath);
+		});
+		return src;
+	}
+};
 
-function parse(expr) {
+function parse(expr, method) {
+	method = method || "eval";
 	var m = expr.match(RX);
 	if (m) {
 		m.forEach(function (token) {
@@ -39,11 +50,12 @@ function parse(expr) {
 	var fn = new Function("entry", "__val", "return (" + expr + ")");
 
 	return function (entry) {
-		return fn(entry, val);
+		return fn(entry, EVALS[method]);
 	};
 }
 
-function tokens(expr) {
+function tokens(expr, method) {
+	method = method || "eval";
 	if (expr == "${JSON}") return function (entry) {
 		return JSON.stringify(entry, null, 2);
 	};
@@ -56,7 +68,7 @@ function tokens(expr) {
 		expr = expr.substring(idx + token.length);
 		list.push(t);
 		list.push(function (entry) {
-			return val(entry, token.replace(/\$|\{|\}/g, ""));
+			return EVALS[method](entry, token.replace(/\$|\{|\}/g, ""));
 		});
 	});
 	list.push(expr);
@@ -94,7 +106,7 @@ function jsontokens(json) {
 			return map;
 		}, {});
 
-		return valwalk(extend(true, {}, json), map, "");
+		return EVALS.valwalk(extend(true, {}, json), map, "");
 	};
 }
 

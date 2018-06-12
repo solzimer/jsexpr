@@ -33,7 +33,7 @@ $RECYCLE.BIN/
 
 # Node
 node_modules
-test/perf
+#test/perf
 test/out
 
 # Files that might appear in the root of a volume
