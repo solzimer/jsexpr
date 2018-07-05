@@ -72,5 +72,4 @@ MODES.forEach(mode=>{
 			assert.equal('( + 10) / 2 + 30',res);
 		});
 	});
-
 });

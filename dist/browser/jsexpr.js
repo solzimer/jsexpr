@@ -85,11 +85,11 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 			},
 			valwalk: function valwalk(src, ops, path) {
 				if (!src) return src;
-				Object.keys(src).forEach(function (k) {
+				for (var k in src) {
 					var newpath = "" + path + (path ? '.' : '') + k;
-					if (ops[newpath]) src[k] = ops[newpath];
-					if (_typeof(src[k]) == "object") EVALS.valwalk(src[k], ops, newpath);
-				});
+					var rop = ops[newpath];
+					if (rop !== undefined) src[k] = rop;else if (_typeof(src[k]) == "object") EVALS.valwalk(src[k], ops, newpath);
+				};
 				return src;
 			}
 		};
@@ -137,7 +137,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 		}
 
 		function jsontokens(json) {
-			var ops = [];
+			var ops = [],
+			    len = 0;
 
 			function walk(json, path) {
 				if (!json) return;
@@ -153,15 +154,14 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 			}
 
 			walk(json, "");
+			len = ops.length;
 
 			return function (entry) {
-				var map = ops.map(function (op) {
-					return { path: op.path, value: op.fn(entry) };
-				}).reduce(function (map, op) {
-					map[op.path] = op.value;
-					return map;
-				}, {});
-
+				var map = {};
+				for (var i = 0; i < len; i++) {
+					var op = ops[i];
+					map[op.path] = op.fn(entry);
+				}
 				return EVALS.valwalk(extend(true, {}, json), map, "");
 			};
 		}
@@ -169,8 +169,12 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 		module.exports = {
 			fn: parse,
 			eval: parse,
-			expr: function expr(input) {
-				if ((typeof input === "undefined" ? "undefined" : _typeof(input)) == "object") return jsontokens(input);else return tokens(input);
+			expr: function expr(input, replace) {
+				if ((typeof input === "undefined" ? "undefined" : _typeof(input)) == "object") {
+					return jsontokens(input, replace);
+				} else {
+					return tokens(input);
+				}
 			}
 		};
 	}, { "extend": 4 }], 4: [function (require, module, exports) {
