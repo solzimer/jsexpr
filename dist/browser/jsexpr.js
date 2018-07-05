@@ -116,7 +116,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 				return JSON.stringify(entry, null, 2);
 			};
 
-			var list = [];
+			var list = [],
+			    len = 0;
 			var m = expr.match(RX) || [];
 			m.forEach(function (token) {
 				var idx = expr.indexOf(token);
@@ -128,11 +129,15 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 				});
 			});
 			list.push(expr);
+			len = list.length;
 
 			return function (entry) {
-				return list.map(function (t) {
-					return typeof t == "string" ? t : t(entry);
-				}).join("");
+				var ret = "";
+				for (var i = 0; i < len; i++) {
+					var t = list[i];
+					ret += typeof t == "string" ? t : t(entry);
+				}
+				return ret;
 			};
 		}
 
