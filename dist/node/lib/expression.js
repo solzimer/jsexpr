@@ -71,7 +71,7 @@ function parse(expr, method) {
 }
 
 function tokens(expr, method) {
-	method = method || "ceval";
+	method = EVALS[method || "ceval"];
 	if (expr == "${JSON}") return function (entry) {
 		return JSON.stringify(entry, null, 2);
 	};
@@ -82,10 +82,11 @@ function tokens(expr, method) {
 	m.forEach(function (token) {
 		var idx = expr.indexOf(token);
 		var t = expr.substring(0, idx);
+		var rtoken = token.replace(RX_RPL_TOKEN, "");
 		expr = expr.substring(idx + token.length);
 		list.push(t);
 		list.push(function (entry) {
-			return EVALS[method](entry, token.replace(RX_RPL_TOKEN, ""));
+			return method(entry, rtoken);
 		});
 	});
 	list.push(expr);
