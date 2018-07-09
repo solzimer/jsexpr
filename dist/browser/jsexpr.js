@@ -130,16 +130,26 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 				});
 			});
 			list.push(expr);
+			list = list.filter(function (l) {
+				return l != "";
+			});
 			len = list.length;
 
-			return function (entry) {
-				var ret = "";
-				for (var i = 0; i < len; i++) {
-					var t = list[i];
-					ret += typeof t == "string" ? t : t(entry);
-				}
-				return ret;
-			};
+			if (len > 1) {
+				return function (entry) {
+					var ret = "";
+					for (var i = 0; i < len; i++) {
+						var t = list[i];
+						ret += typeof t == "string" ? t : t(entry);
+					}
+					return ret;
+				};
+			} else {
+				return function (entry) {
+					var t = list[0];
+					return typeof t == "string" ? t : t(entry);
+				};
+			}
 		}
 
 		function jsontokens(json) {
