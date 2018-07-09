@@ -16,3 +16,8 @@ console.log(JSON.stringify(expr1(input1),null,2));
 
 console.log(JSON.stringify(output2,null,2));
 console.log(JSON.stringify(expr1(input2),null,2));
+
+var assign = expr.assign("a.b.c[0]");
+var input3 = {a:{b:{c:[1,2,3,4,5]}}};
+assign(input3,"10");
+console.log(JSON.stringify(input3,null,2));
