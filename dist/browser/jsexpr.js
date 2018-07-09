@@ -46,12 +46,11 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 		var RX = /\$\{[^\}]+\}/g;
 		var RX_RPL_PARSE = /[\$\{\}]/g;
 		var RX_RPL_TOKEN = /\$|\{|\}/g;
-
 		var CACHE = {};
 
 		function cacheeval(obj, key) {
 			if (!CACHE[key]) {
-				var fn = eval("(function(){\n\t\t\treturn function() {\n\t\t\t\ttry {\n\t\t\t\t\treturn this." + key + ";\n\t\t\t\t}catch(err) {\n\t\t\t\t\treturn undefined;\n\t\t\t\t}\n\t\t\t}\n\t\t})()");
+				var fn = eval("(function(){\n\t\t\treturn function() {\n\t\t\t\ttry {\n\t\t\t\t\treturn this." + key + ";\n\t\t\t\t}catch(err) {\n\t\t\t\t\ttry {\n\t\t\t\t\t\treturn " + key + ";\n\t\t\t\t\t}catch(err) {\n\t\t\t\t\t\treturn undefined;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t})()");
 				CACHE[key] = fn;
 			}
 			return CACHE[key].call(obj);
@@ -63,6 +62,10 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 			} catch (err) {
 				return undefined;
 			}
+		}
+
+		function fnassign(path) {
+			return eval("(function(){\n\t\treturn function(obj,val) {\n\t\t\ttry {\n\t\t\t\treturn obj." + path + " = val;\n\t\t\t}catch(err) {}\n\t\t}\n\t})()");
 		}
 
 		var EVALS = {
@@ -185,12 +188,12 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 		module.exports = {
 			fn: parse,
 			eval: parse,
+			assign: fnassign,
 			expr: function expr(input, replace) {
-				if ((typeof input === "undefined" ? "undefined" : _typeof(input)) == "object") {
-					return jsontokens(input, replace);
-				} else {
-					return tokens(input);
-				}
+				return (typeof input === "undefined" ? "undefined" : _typeof(input)) == "object" ? jsontokens(input, replace) : tokens(input);
+			},
+			expression: function expression(input, replace) {
+				return (typeof input === "undefined" ? "undefined" : _typeof(input)) == "object" ? jsontokens(input, replace) : tokens(input);
 			}
 		};
 	}, { "extend": 4 }], 4: [function (require, module, exports) {
