@@ -190,7 +190,15 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 			eval: parse,
 			assign: fnassign,
 			expr: function expr(input, replace) {
-				return (typeof input === "undefined" ? "undefined" : _typeof(input)) == "object" ? jsontokens(input, replace) : tokens(input);
+				if (typeof input == 'number') {
+					return function (obj) {
+						return input;
+					};
+				} else if ((typeof input === "undefined" ? "undefined" : _typeof(input)) == "object") {
+					return jsontokens(input, replace);
+				} else {
+					return tokens(input);
+				}
 			},
 			expression: function expression(input, replace) {
 				return (typeof input === "undefined" ? "undefined" : _typeof(input)) == "object" ? jsontokens(input, replace) : tokens(input);
