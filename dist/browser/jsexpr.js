@@ -44,7 +44,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 	}, { "./lib/expression": 3 }], 3: [function (require, module, exports) {
 		var extend = require("extend");
 		var RX = /\$\{[^\}]+\}/g;
-		var RX_RPL_PARSE = /[\$\{\}]/g;
+		var RX_RPL_PARSE = /\{\$([^\}]+)\}/g;
 		var RX_RPL_TOKEN = /\$\{|\}/g;
 		var CACHE = {};
 
@@ -102,7 +102,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 			var m = expr.match(RX);
 			if (m) {
 				m.forEach(function (token) {
-					var key = token.replace(RX_RPL_PARSE, "").trim();
+					var key = token.replace(RX_RPL_PARSE, "$1").trim();
 					expr = expr.replace(token, "__val(entry,'" + key + "')");
 				});
 			}
