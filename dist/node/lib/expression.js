@@ -4,7 +4,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 var extend = require("extend");
 var RX = /\$\{[^\}]+\}/g;
-var RX_RPL_PARSE = /\$\{([^\}]+)\}/g;
+var RX_RPL_PARSE = /\$\{([^\}]+)\}/;
 var RX_RPL_TOKEN = /\$\{|\}/g;
 var CACHE = {};
 

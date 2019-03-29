@@ -30,6 +30,7 @@ MODES.forEach(mode=>{
 		let fn1 = expression.fn('(${a} + ${b}) / ${c} + ${d.e}',mode);
 		let fn2 = expression.fn('(${a[1]} + ${b[2]}) / ${c[this.d.e]}',mode);
 		let fn3 = expression.fn('${a} < ${d.e}',mode);
+		let fn4 = expression.fn('${$a} < ${$d.e}',mode);
 
 		it('Should perform operation', function() {
 			let res = fn1({a:5,b:10,c:3,d:{e:30}});
@@ -57,15 +58,24 @@ MODES.forEach(mode=>{
 			let res = fn3({a:30,d:{e:30}});
 			assert.equal(false,res);
 		});
+		it('Should evaluate condition with $ (true)', function() {
+			let res = fn4({$a:5,$d:{e:30}});
+			assert.equal(true,res);
+		});
 	});
 
 	describe(`String interpolation (${mode})`, function() {
 		let fn1 = expression.expr('(${a} + ${b}) / ${c} + ${d.e}',mode);
 		let fn2 = expression.expr('${a} < ${d.e}',mode);
+		let fn3 = expression.expr('${$a} < ${$d.e}',mode);
 
 		it('Should interpolate operation', function() {
 			let res = fn1({a:5,b:10,c:3,d:{e:30}});
 			assert.equal('(5 + 10) / 3 + 30',res);
+		});
+		it('Should interpolate operation', function() {
+			let res = fn3({$a:5,b:10,c:3,$d:{e:30}});
+			assert.equal('5 < 30',res);
 		});
 		it('Should interpolate with missing values', function() {
 			let res = fn1({b:10,c:2,d:{e:30}});
