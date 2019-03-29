@@ -4,7 +4,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 var extend = require("extend");
 var RX = /\$\{[^\}]+\}/g;
-var RX_RPL_PARSE = /[\$\{\}]/g;
+//const RX_RPL_PARSE = /[\$\{\}]/g;
+var RX_RPL_PARSE = /\$\{([^}]+)\}/g;
 var RX_RPL_TOKEN = /\$|\{|\}/g;
 var CACHE = {};
 
@@ -62,7 +63,7 @@ function parse(expr, method) {
 	var m = expr.match(RX);
 	if (m) {
 		m.forEach(function (token) {
-			var key = token.replace(RX_RPL_PARSE, "").trim();
+			var key = token.replace(RX_RPL_PARSE, "$1").trim();
 			expr = expr.replace(token, "__val(entry,'" + key + "')");
 		});
 	}
