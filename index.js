@@ -1,5 +1,5 @@
 /*jshint esversion: 6 */
 
-const expr = require('./lib/expression');
+const expr = require('./lib');
 
 module.exports = expr;

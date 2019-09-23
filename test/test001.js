@@ -1,5 +1,5 @@
 const
-	expression = require("../lib/expression"),
+	expression = require("../"),
 	assert = require('assert');
 
 const MODES = ["eval","iteval","ceval"];

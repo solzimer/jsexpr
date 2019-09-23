@@ -1,4 +1,4 @@
-const expr = require('./index');
+const expr = require('.');
 
 let fn1 = expr.eval('(${a} + ${b}) / ${c} + ${d.e}');
 console.log(fn1({a:4,b:6,c:10,d:{e:4}}));
@@ -21,3 +21,7 @@ var assign = expr.assign("a.b.c[0]");
 var input3 = {a:{b:{c:[1,2,3,4,5]}}};
 assign(input3,"10");
 console.log(JSON.stringify(input3,null,2));
+
+let nexpr = expr.newInstance('@');
+fn1 = nexpr.eval('(@{a} + @{b}) / @{c} + @{d.e}');
+console.log(fn1({a:4,b:6,c:10,d:{e:4}}));
