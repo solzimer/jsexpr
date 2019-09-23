@@ -1,18 +1,18 @@
-"use strict";
+'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 var extend = require("extend");
 
 function instance(token) {
-	var RX = new RegExp("\\" + token + "\\{[^\\}]+\\}", 'g'); // /\$\{[^\}]+\}/g;
-	var RX_RPL_PARSE = new RegExp("\\" + token + "\\{([^\\}]+)\\}"); // /\$\{([^\}]+)\}/;
-	var RX_RPL_TOKEN = new RegExp("\\" + token + "\\{|\\}"); // /\$\{|\}/g;
+	var RX = new RegExp('\\' + token + '\\{[^\\}]+\\}', 'g'); // /\$\{[^\}]+\}/g;
+	var RX_RPL_PARSE = new RegExp('\\' + token + '\\{([^\\}]+)\\}'); // /\$\{([^\}]+)\}/;
+	var RX_RPL_TOKEN = new RegExp('\\' + token + '\\{|\\}', 'g'); // /\$\{|\}/g;
 	var CACHE = {};
 
 	function cacheeval(obj, key) {
 		if (!CACHE[key]) {
-			var fn = eval("(function(){\n\t\t\t\treturn function() {\n\t\t\t\t\ttry {\n\t\t\t\t\t\treturn this." + key + ";\n\t\t\t\t\t}catch(err) {\n\t\t\t\t\t\ttry {\n\t\t\t\t\t\t\treturn " + key + ";\n\t\t\t\t\t\t}catch(err) {\n\t\t\t\t\t\t\treturn undefined;\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t})()");
+			var fn = eval('(function(){\n\t\t\t\treturn function() {\n\t\t\t\t\ttry {\n\t\t\t\t\t\treturn this.' + key + ';\n\t\t\t\t\t}catch(err) {\n\t\t\t\t\t\ttry {\n\t\t\t\t\t\t\treturn ' + key + ';\n\t\t\t\t\t\t}catch(err) {\n\t\t\t\t\t\t\treturn undefined;\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t})()');
 			CACHE[key] = fn;
 		}
 		return CACHE[key].call(obj);
@@ -27,7 +27,7 @@ function instance(token) {
 	}
 
 	function fnassign(path) {
-		return eval("(function(){\n\t\t\treturn function(obj,val) {\n\t\t\t\ttry {\n\t\t\t\t\treturn obj." + path + " = val;\n\t\t\t\t}catch(err) {}\n\t\t\t}\n\t\t})()");
+		return eval('(function(){\n\t\t\treturn function(obj,val) {\n\t\t\t\ttry {\n\t\t\t\t\treturn obj.' + path + ' = val;\n\t\t\t\t}catch(err) {}\n\t\t\t}\n\t\t})()');
 	}
 
 	var EVALS = {
@@ -51,7 +51,7 @@ function instance(token) {
 		valwalk: function valwalk(src, ops, path) {
 			if (!src) return src;
 			for (var k in src) {
-				var newpath = "" + path + (path ? '.' : '') + k;
+				var newpath = '' + path + (path ? '.' : '') + k;
 				var rop = ops[newpath];
 				if (rop !== undefined) src[k] = rop;else if (_typeof(src[k]) == "object") EVALS.valwalk(src[k], ops, newpath);
 			};
@@ -124,7 +124,7 @@ function instance(token) {
 		function walk(json, path) {
 			if (!json) return;
 			Object.keys(json).forEach(function (k) {
-				var newpath = "" + path + (path ? '.' : '') + k;
+				var newpath = '' + path + (path ? '.' : '') + k;
 				var t = json[k];
 				if (typeof t == "string") {
 					ops.push({ path: newpath, fn: tokens(t) });
@@ -152,7 +152,7 @@ function instance(token) {
 			return function (obj) {
 				return input;
 			};
-		} else if ((typeof input === "undefined" ? "undefined" : _typeof(input)) == "object") {
+		} else if ((typeof input === 'undefined' ? 'undefined' : _typeof(input)) == "object") {
 			return jsontokens(input, replace);
 		} else {
 			return tokens(input);

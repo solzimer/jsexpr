@@ -65,6 +65,7 @@ MODES.forEach(mode=>{
 	});
 
 	describe(`String interpolation (${mode})`, function() {
+		debugger;
 		let fn1 = expression.expr('(${a} + ${b}) / ${c} + ${d.e}',mode);
 		let fn2 = expression.expr('${a} < ${d.e}',mode);
 		let fn3 = expression.expr('${$a} < ${$d.e}',mode);

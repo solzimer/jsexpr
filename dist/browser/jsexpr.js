@@ -47,7 +47,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 		function instance(token) {
 			var RX = new RegExp("\\" + token + "\\{[^\\}]+\\}", 'g'); // /\$\{[^\}]+\}/g;
 			var RX_RPL_PARSE = new RegExp("\\" + token + "\\{([^\\}]+)\\}"); // /\$\{([^\}]+)\}/;
-			var RX_RPL_TOKEN = new RegExp("\\" + token + "\\{|\\}"); // /\$\{|\}/g;
+			var RX_RPL_TOKEN = new RegExp("\\" + token + "\\{|\\}", 'g'); // /\$\{|\}/g;
 			var CACHE = {};
 
 			function cacheeval(obj, key) {
