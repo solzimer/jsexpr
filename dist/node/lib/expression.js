@@ -77,7 +77,7 @@ function instance(token) {
 
 	function tokens(expr, method) {
 		method = EVALS[method || "ceval"];
-		if (expr == "${JSON}") return function (entry) {
+		if (expr == token + '{JSON}') return function (entry) {
 			return JSON.stringify(entry, null, 2);
 		};
 
