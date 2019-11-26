@@ -64,3 +64,33 @@ var result = jsexpr({
 	}
 }
 ```
+
+### JSON Stringify
+```javascript
+var input1 = {client : "HOST001", address : {host : "localhost", port : 8080}, headers : "Content-Type: application/json"};
+
+let jxpr1 = expr.expr("${JSON}");
+let jxpr2 = expr.expr("${JSON:address}");
+let jxpr3 = expr.expr("${JSON:address:0}");
+let jxpr4 = expr.expr("${JSON:0}");
+
+// =>
+
+{
+  "client": "HOST001",
+  "address": {
+    "host": "localhost",
+    "port": 8080
+  },
+  "headers": "Content-Type: application/json"
+}
+
+{
+  "host": "localhost",
+  "port": 8080
+}
+
+{"host":"localhost","port":8080}
+
+{"client":"HOST001","address":{"host":"localhost","port":8080},"headers":"Content-Type: application/json"}
+```
