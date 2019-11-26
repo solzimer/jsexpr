@@ -117,7 +117,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 			function tokens(expr, method) {
 				method = EVALS[method || "ceval"];
-				if (expr == "${JSON}") return function (entry) {
+				if (expr == token + "{JSON}") return function (entry) {
 					return JSON.stringify(entry, null, 2);
 				};
 
