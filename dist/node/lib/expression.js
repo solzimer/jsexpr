@@ -8,11 +8,12 @@ function instance(token) {
 	var RX = new RegExp('\\' + token + '\\{[^\\}]+\\}', 'g'); // /\$\{[^\}]+\}/g;
 	var RX_RPL_PARSE = new RegExp('\\' + token + '\\{([^\\}]+)\\}'); // /\$\{([^\}]+)\}/;
 	var RX_RPL_TOKEN = new RegExp('\\' + token + '\\{|\\}', 'g'); // /\$\{|\}/g;
+	var RX_JSON_TOKEN = new RegExp('^\\' + token + '\\{JSON(:(\\d+|([^:]+(:(\\d+))?)))?\\}$');
 	var CACHE = {};
 
 	function cacheeval(obj, key) {
 		if (!CACHE[key]) {
-			var fn = eval('(function(){\n\t\t\t\treturn function() {\n\t\t\t\t\ttry {\n\t\t\t\t\t\treturn this.' + key + ';\n\t\t\t\t\t}catch(err) {\n\t\t\t\t\t\ttry {\n\t\t\t\t\t\t\treturn ' + key + ';\n\t\t\t\t\t\t}catch(err) {\n\t\t\t\t\t\t\treturn undefined;\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t})()');
+			var fn = eval('(function(){\n\t\t\t\treturn \'' + key + '\'!=\'this\'?\n\t\t\t\t\tfunction() {\n\t\t\t\t\t\tlet r = undefined;\n\t\t\t\t\t\ttry {r=this.' + key + ';}\n\t\t\t\t\t\tcatch(err){try{r=' + key + ';}catch(err){}}\n\t\t\t\t\t\treturn r;\n\t\t\t\t\t} :\n\t\t\t\t\tfunction() {\n\t\t\t\t\t\tlet r = undefined;\n\t\t\t\t\t\ttry {r=' + key + ';}\n\t\t\t\t\t\tcatch(err){}\n\t\t\t\t\t\treturn r;\n\t\t\t\t\t}\n\t\t\t})()');
 			CACHE[key] = fn;
 		}
 		return CACHE[key].call(obj);
@@ -77,9 +78,28 @@ function instance(token) {
 
 	function tokens(expr, method) {
 		method = EVALS[method || "ceval"];
-		if (expr == token + '{JSON}') return function (entry) {
-			return JSON.stringify(entry, null, 2);
-		};
+
+		// JSON stringify
+		if (RX_JSON_TOKEN.test(expr)) {
+			var parts = expr.replace(RX_RPL_TOKEN, "").split(":");
+			var nexpr = parts[1];
+			var spaces = parts[2];
+			if (parts.length == 2) {
+				if (isNaN(nexpr)) {
+					spaces = 2;
+				} else {
+					nexpr = 'this';spaces = parts[1];
+				}
+			} else if (parts.length == 1) {
+				nexpr = 'this';
+				spaces = 2;
+			}
+			spaces = parseInt(spaces);
+			var fnxpr = tokens("${" + nexpr + "}");
+			return function (entry) {
+				return JSON.stringify(fnxpr(entry), null, spaces);
+			};
+		}
 
 		var list = [],
 		    len = 0;
