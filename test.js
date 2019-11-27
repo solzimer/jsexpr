@@ -35,3 +35,15 @@ console.log(jxpr1(input1));
 console.log(jxpr2(input1));
 console.log(jxpr3(input1));
 console.log(jxpr4(input1));
+
+let obj1 = {test:false};
+let evxpr1 = expr.expr("${!this.test}");
+let evxpr2 = expr.expr("${this.test}");
+let evxpr3 = expr.expr("${test}");
+let evxpr4 = expr.expr("${!test}");
+let evxpr5 = expr.expr("${this}");
+console.log(evxpr1(obj1));
+console.log(evxpr2(obj1));
+console.log(evxpr3(obj1));
+console.log(evxpr4(obj1));
+console.log(evxpr5(obj1));
