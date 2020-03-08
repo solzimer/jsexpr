@@ -47,3 +47,6 @@ console.log(evxpr2(obj1));
 console.log(evxpr3(obj1));
 console.log(evxpr4(obj1));
 console.log(evxpr5(obj1));
+
+let qexp = expr.expr("${a['b.c']}");
+console.log(qexp({a:{b:{c:"hi"}}}));
