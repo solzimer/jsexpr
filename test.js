@@ -1,5 +1,12 @@
 const expr = require('./index.js');
 
+function runTest(test) {
+	test.xps.forEach(t=>{
+		let xp = expr[t.type](t.xp);
+		console.log(xp(test.obj));
+	});
+}
+
 let fn1 = expr.eval('(${a} + ${b}) / ${this.c} + ${d.e}');
 console.log(fn1({a:4,b:6,c:10,d:{e:4}}));
 
@@ -26,27 +33,38 @@ let nexpr = expr.newInstance('@');
 fn1 = nexpr.eval('(@{a} + @{b}) / @{c} + @{d.e}');
 console.log(fn1({a:4,b:6,c:10,d:{e:4}}));
 
-let jxpr1 = expr.expr("${JSON}");
-let jxpr2 = expr.expr("${JSON:address}");
-let jxpr3 = expr.expr("${JSON:address:0}");
-let jxpr4 = expr.expr("${JSON:0}");
 
-console.log(jxpr1(input1));
-console.log(jxpr2(input1));
-console.log(jxpr3(input1));
-console.log(jxpr4(input1));
+let test04 = {
+	obj : {client : "HOST001", address : {host : "localhost", port : 8080}, headers : "Content-Type: application/json"},
+	xps : [
+		{type:"expr", xp:"${JSON}"},
+		{type:"expr", xp:"${JSON:address}"},
+		{type:"expr", xp:"${JSON:address:0}"},
+		{type:"expr", xp:"${JSON:0}"}
+	]
+}
 
-let obj1 = {test:false};
-let evxpr1 = expr.expr("${!this.test}");
-let evxpr2 = expr.expr("${this.test}");
-let evxpr3 = expr.expr("${test}");
-let evxpr4 = expr.expr("${!test}");
-let evxpr5 = expr.expr("${this}");
-console.log(evxpr1(obj1));
-console.log(evxpr2(obj1));
-console.log(evxpr3(obj1));
-console.log(evxpr4(obj1));
-console.log(evxpr5(obj1));
+let test05 = {
+	obj : {test:false},
+	xps : [
+		{type:'expr', xp:"${!this.test}"},
+		{type:'expr', xp:"${this.test}"},
+		{type:'expr', xp:"${test}"},
+		{type:'expr', xp:"${!test}"},
+		{type:'expr', xp:"${this}"}
+	]
+}
 
-let qexp = expr.expr("${a['b.c']}");
-console.log(qexp({a:{b:{c:"hi"}}}));
+let test06 = {
+	obj : {a:{b:{c:"hi"}}},
+	xps : [
+		{type:'expr', xp:"${a['b']['c']}"},
+		{type:'expr', xp:'${a["b"]["c"]}'},
+		{type:'eval', xp:"${a['b']['c']}=='hi'"},
+		{type:'eval', xp:'${a["b"]["c"]}=="hi"'}
+	]
+};
+
+runTest(test04);
+runTest(test05);
+runTest(test06);
