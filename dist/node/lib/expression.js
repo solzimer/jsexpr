@@ -13,8 +13,9 @@ function instance(token) {
 
 	function cacheeval(obj, key) {
 		if (!CACHE[key]) {
+			var rkey = key.replace(/'/g, "\\'");
 			var rx = /^[a-zA-Z$_@]/;
-			var fn = eval('(function(){\n\t\t\t\tlet rx = /^[a-zA-Z$_]/;\n\t\t\t\treturn \'' + key + '\'.startsWith(\'this.\') || \'' + key + '\'==\'this\' || !rx.test(\'' + key + '\')?\n\t\t\t\t\tfunction() {\n\t\t\t\t\t\tlet r = undefined;\n\t\t\t\t\t\ttry {r=' + key + ';}\n\t\t\t\t\t\tcatch(err){}\n\t\t\t\t\t\treturn r;\n\t\t\t\t\t} :\n\t\t\t\t\tfunction() {\n\t\t\t\t\t\tlet r = undefined;\n\t\t\t\t\t\ttry {r=this.' + (rx.test(key) ? key : '$___$') + ';}\n\t\t\t\t\t\tcatch(err){try{r=' + key + ';}catch(err){}}\n\t\t\t\t\t\treturn r;\n\t\t\t\t\t}\n\t\t\t})()');
+			var fn = eval('(function(){\n\t\t\t\tlet rx = /^[a-zA-Z$_]/;\n\t\t\t\treturn \'' + rkey + '\'.startsWith(\'this.\') || \'' + rkey + '\'==\'this\' || !rx.test(\'' + rkey + '\')?\n\t\t\t\t\tfunction() {\n\t\t\t\t\t\tlet r = undefined;\n\t\t\t\t\t\ttry {r=' + key + ';}\n\t\t\t\t\t\tcatch(err){}\n\t\t\t\t\t\treturn r;\n\t\t\t\t\t} :\n\t\t\t\t\tfunction() {\n\t\t\t\t\t\tlet r = undefined;\n\t\t\t\t\t\ttry {r=this.' + (rx.test(key) ? key : '$___$') + ';}\n\t\t\t\t\t\tcatch(err){try{r=' + key + ';}catch(err){}}\n\t\t\t\t\t\treturn r;\n\t\t\t\t\t}\n\t\t\t})()');
 			CACHE[key] = fn;
 		}
 		return CACHE[key].call(obj);
@@ -66,7 +67,7 @@ function instance(token) {
 		var m = expr.match(RX);
 		if (m) {
 			m.forEach(function (token) {
-				var key = token.replace(RX_RPL_PARSE, "$1").trim();
+				var key = token.replace(RX_RPL_PARSE, "$1").trim().replace(/'/g, "\\'");
 				expr = expr.replace(token, "__val(entry,'" + key + "')");
 			});
 		}

@@ -65,6 +65,14 @@ let test06 = {
 	]
 };
 
+let test07 = {
+	obj : {a:new Date()},
+	xps : [
+		{type:'expr', xp:"${a.toLocaleTimeString('en')}"},
+	]
+};
+
 runTest(test04);
 runTest(test05);
 runTest(test06);
+runTest(test07);
