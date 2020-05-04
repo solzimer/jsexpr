@@ -181,12 +181,25 @@ function instance(token) {
 		}
 	}
 
+	function traverse(object, callback) {
+		for (var key in object) {
+			object[key] = callback(object, key, object[key]);
+		}
+
+		for (var _key in object) {
+			if (_typeof(object[_key]) == 'object') {
+				traverse(object[_key], callback);
+			}
+		}
+	}
+
 	return {
 		fn: parse,
 		eval: parse,
 		assign: fnassign,
 		expr: exprfn,
-		expression: exprfn
+		expression: exprfn,
+		traverse: traverse
 	};
 }
 
