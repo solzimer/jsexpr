@@ -76,3 +76,16 @@ runTest(test04);
 runTest(test05);
 runTest(test06);
 runTest(test07);
+
+expr.traverse({
+	a: {
+		b: 1,
+		c: [1,2,3],
+		d: {
+			e : "f"
+		}
+	}
+},(obj,key,val)=>{
+	console.log(key,val);
+	return val;
+});
