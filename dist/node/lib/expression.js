@@ -1,21 +1,22 @@
-'use strict';
+"use strict";
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-var extend = require("extend");
+var extend = require("extend"),
+    Mingo = require("mingo");
 
 function instance(token) {
-	var RX = new RegExp('\\' + token + '\\{[^\\}]+\\}', 'g'); // /\$\{[^\}]+\}/g;
-	var RX_RPL_PARSE = new RegExp('\\' + token + '\\{([^\\}]+)\\}'); // /\$\{([^\}]+)\}/;
-	var RX_RPL_TOKEN = new RegExp('\\' + token + '\\{|\\}', 'g'); // /\$\{|\}/g;
-	var RX_JSON_TOKEN = new RegExp('^\\' + token + '\\{JSON(:(\\d+|([^:]+(:(\\d+))?)))?\\}$');
+	var RX = new RegExp("\\" + token + "\\{[^\\}]+\\}", 'g'); // /\$\{[^\}]+\}/g;
+	var RX_RPL_PARSE = new RegExp("\\" + token + "\\{([^\\}]+)\\}"); // /\$\{([^\}]+)\}/;
+	var RX_RPL_TOKEN = new RegExp("\\" + token + "\\{|\\}", 'g'); // /\$\{|\}/g;
+	var RX_JSON_TOKEN = new RegExp("^\\" + token + "\\{JSON(:(\\d+|([^:]+(:(\\d+))?)))?\\}$");
 	var CACHE = {};
 
 	function cacheeval(obj, key) {
 		if (!CACHE[key]) {
 			var rkey = key.replace(/'/g, "\\'");
 			var rx = /^[a-zA-Z$_@]/;
-			var fn = eval('(function(){\n\t\t\t\tlet rx = /^[a-zA-Z$_]/;\n\t\t\t\treturn \'' + rkey + '\'.startsWith(\'this.\') || \'' + rkey + '\'==\'this\' || !rx.test(\'' + rkey + '\')?\n\t\t\t\t\tfunction() {\n\t\t\t\t\t\tlet r = undefined;\n\t\t\t\t\t\ttry {r=' + key + ';}\n\t\t\t\t\t\tcatch(err){}\n\t\t\t\t\t\treturn r;\n\t\t\t\t\t} :\n\t\t\t\t\tfunction() {\n\t\t\t\t\t\tlet r = undefined;\n\t\t\t\t\t\ttry {r=this.' + (rx.test(key) ? key : '$___$') + ';}\n\t\t\t\t\t\tcatch(err){try{r=' + key + ';}catch(err){}}\n\t\t\t\t\t\treturn r;\n\t\t\t\t\t}\n\t\t\t})()');
+			var fn = eval("(function(){\n\t\t\t\tlet rx = /^[a-zA-Z$_]/;\n\t\t\t\treturn '" + rkey + "'.startsWith('this.') || '" + rkey + "'=='this' || !rx.test('" + rkey + "')?\n\t\t\t\t\tfunction() {\n\t\t\t\t\t\tlet r = undefined;\n\t\t\t\t\t\ttry {r=" + key + ";}\n\t\t\t\t\t\tcatch(err){}\n\t\t\t\t\t\treturn r;\n\t\t\t\t\t} :\n\t\t\t\t\tfunction() {\n\t\t\t\t\t\tlet r = undefined;\n\t\t\t\t\t\ttry {r=this." + (rx.test(key) ? key : '$___$') + ";}\n\t\t\t\t\t\tcatch(err){try{r=" + key + ";}catch(err){}}\n\t\t\t\t\t\treturn r;\n\t\t\t\t\t}\n\t\t\t})()");
 			CACHE[key] = fn;
 		}
 		return CACHE[key].call(obj);
@@ -30,7 +31,7 @@ function instance(token) {
 	}
 
 	function fnassign(path) {
-		return eval('(function(){\n\t\t\treturn function(obj,val) {\n\t\t\t\ttry {\n\t\t\t\t\treturn obj.' + path + ' = val;\n\t\t\t\t}catch(err) {}\n\t\t\t}\n\t\t})()');
+		return eval("(function(){\n\t\t\treturn function(obj,val) {\n\t\t\t\ttry {\n\t\t\t\t\treturn obj." + path + " = val;\n\t\t\t\t}catch(err) {}\n\t\t\t}\n\t\t})()");
 	}
 
 	var EVALS = {
@@ -54,7 +55,7 @@ function instance(token) {
 		valwalk: function valwalk(src, ops, path) {
 			if (!src) return src;
 			for (var k in src) {
-				var newpath = '' + path + (path ? '.' : '') + k;
+				var newpath = "" + path + (path ? '.' : '') + k;
 				var rop = ops[newpath];
 				if (rop !== undefined) src[k] = rop;else if (_typeof(src[k]) == "object") EVALS.valwalk(src[k], ops, newpath);
 			};
@@ -146,7 +147,7 @@ function instance(token) {
 		function walk(json, path) {
 			if (!json) return;
 			Object.keys(json).forEach(function (k) {
-				var newpath = '' + path + (path ? '.' : '') + k;
+				var newpath = "" + path + (path ? '.' : '') + k;
 				var t = json[k];
 				if (typeof t == "string") {
 					ops.push({ path: newpath, fn: tokens(t) });
@@ -169,13 +170,37 @@ function instance(token) {
 		};
 	}
 
+	function mingotokens(json) {
+		var xpr = Array.isArray(json.$) ? json.$ : [json.$];
+		var aggr = new Mingo.Aggregator(xpr);
+		return function (input) {
+			var isArray = Array.isArray(input);
+			var res = aggr.run(isArray ? input : [input]);
+			if (!isArray && res.length <= 1) return res[0];else return res;
+		};
+	}
+
 	function exprfn(input, replace) {
 		if (typeof input == 'number') {
 			return function (obj) {
 				return input;
 			};
-		} else if ((typeof input === 'undefined' ? 'undefined' : _typeof(input)) == "object") {
-			return jsontokens(input, replace);
+		} else if ((typeof input === "undefined" ? "undefined" : _typeof(input)) == "object") {
+			var ninput = extend({}, input);
+			delete ninput['$'];
+
+			var prfn = input["$"] ? mingotokens(input, replace) : function () {
+				return input;
+			};
+			var nxfn = Object.keys(ninput).length ? jsontokens(ninput, replace) : function (input) {
+				return input;
+			};
+
+			return function (input) {
+				var prres = prfn(input);
+				var nxres = nxfn(prres);
+				if (typeof nxres._ !== 'undefined' && Object.keys(nxres).length == 1) return nxres._;else return nxres;
+			};
 		} else {
 			return tokens(input);
 		}

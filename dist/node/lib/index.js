@@ -1,6 +1,7 @@
 'use strict';
 
-var expression = require('./expression');
+var expression = require('./expression'),
+    mingo = require('./mingo_ex');
 
 var instance = expression('$');
 instance.newInstance = function (token) {

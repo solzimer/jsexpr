@@ -18,7 +18,8 @@
   "author": "David Gómez Matarrodona <solzimer@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "extend": "^3.0.2"
+    "extend": "^3.0.2",
+    "mingo": "^2.3.5"
   },
   "devDependencies": {
     "babel-core": "^6.26.3",
