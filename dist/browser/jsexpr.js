@@ -236,8 +236,8 @@ var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbo
             return input;
           };
 
-          return function (input) {
-            var prres = prfn(input);
+          return function (obj) {
+            var prres = prfn(obj);
             var nxres = nxfn(prres);
             if (typeof nxres._ !== 'undefined' && Object.keys(nxres).length == 1) return nxres._;else return nxres;
           };
