@@ -189,7 +189,7 @@ function instance(token) {
 			var ninput = extend({}, input);
 			delete ninput['$'];
 
-			var prfn = input["$"] ? mingotokens(input, replace) : function () {
+			var prfn = input["$"] ? mingotokens(input, replace) : function (input) {
 				return input;
 			};
 			var nxfn = Object.keys(ninput).length ? jsontokens(ninput, replace) : function (input) {
