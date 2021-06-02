@@ -71,7 +71,7 @@ var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbo
       }
 
       function fnassign(path) {
-        return eval("(function(){\n\t\t\treturn function(obj,val) {\n\t\t\t\ttry {\n\t\t\t\t\treturn obj." + path + " = val;\n\t\t\t\t}catch(err) {}\n\t\t\t}\n\t\t})()");
+        return eval("(function(path){\n\t\t\treturn function(obj,val) {\n\t\t\t\ttry {\n\t\t\t\t\t// Ensure path\n\t\t\t\t\tlet root = obj;\n\t\t\t\t\tlet kpath = path.split('.');\n\t\t\t\t\tfor(let i=0; i<kpath.length;i++) {\n\t\t\t\t\t\tlet k = kpath[i];\n\t\t\t\t\t\tif(!root[k]) root[k] = {};\n\t\t\t\t\t\troot = root[k];\n\t\t\t\t\t}\n\n\t\t\t\t\treturn obj." + path + " = val;\n\t\t\t\t}catch(err) {}\n\t\t\t}\n\t\t})('" + path + "')");
       }
 
       var EVALS = {
