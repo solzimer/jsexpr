@@ -18,6 +18,7 @@
   "author": "David Gómez Matarrodona <solzimer@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "dayjs": "^1.10.5",
     "extend": "^3.0.2",
     "mingo": "^2.3.5"
   },

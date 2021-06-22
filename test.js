@@ -72,10 +72,23 @@ let test07 = {
 	]
 };
 
+let test08 = {
+	obj : {
+		date : "2020-01-01"
+	},
+	xps : [
+		{type:'expr', xp:"Date is ${DATE:date}"},
+		{type:'expr', xp:"${DATE:date:YYYY-MM-DD}"},
+		{type:'expr', xp:"${DATE:date:YYYY-MM-DD|YYYY-MM-DD}"},
+		{type:'expr', xp:"${DATE:date:YYYY-MM-DD|HH:mm:ss}"},
+	]
+}
+
 runTest(test04);
 runTest(test05);
 runTest(test06);
 runTest(test07);
+runTest(test08);
 
 expr.traverse({
 	a: {
