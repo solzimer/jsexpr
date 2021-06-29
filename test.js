@@ -1,5 +1,4 @@
 const expr = require('./index.js');
-
 function runTest(test) {
 	test.xps.forEach(t=>{
 		let xp = expr[t.type](t.xp);
@@ -7,6 +6,7 @@ function runTest(test) {
 	});
 }
 
+/*
 let fn1 = expr.eval('(${a} + ${b}) / ${this.c} + ${d.e}');
 console.log(fn1({a:4,b:6,c:10,d:{e:4}}));
 
@@ -33,7 +33,7 @@ let nexpr = expr.newInstance('@');
 fn1 = nexpr.eval('(@{a} + @{b}) / @{c} + @{d.e}');
 console.log(fn1({a:4,b:6,c:10,d:{e:4}}));
 
-
+*/
 let test04 = {
 	obj : {client : "HOST001", address : {host : "localhost", port : 8080}, headers : "Content-Type: application/json"},
 	xps : [
@@ -77,10 +77,11 @@ let test08 = {
 		date : "2020-01-01"
 	},
 	xps : [
-		{type:'expr', xp:"Date is ${DATE:date}"},
+		{type:'expr', xp:"Date is: ${DATE:date}"},
 		{type:'expr', xp:"${DATE:date:YYYY-MM-DD}"},
 		{type:'expr', xp:"${DATE:date:YYYY-MM-DD|YYYY-MM-DD}"},
 		{type:'expr', xp:"${DATE:date:YYYY-MM-DD|HH:mm:ss}"},
+		{type:'expr', xp:"Year is: ${SUBSTR:date:0|4}"},
 	]
 }
 
@@ -89,7 +90,7 @@ runTest(test05);
 runTest(test06);
 runTest(test07);
 runTest(test08);
-
+/*
 expr.traverse({
 	a: {
 		b: 1,
@@ -102,3 +103,4 @@ expr.traverse({
 	console.log(key,val);
 	return val;
 });
+*/

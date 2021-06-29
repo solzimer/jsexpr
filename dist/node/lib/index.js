@@ -8,5 +8,9 @@ instance.newInstance = function (token) {
 	return expression(token);
 };
 
+instance.filter = function (name, fncallback) {
+	instance.FILTERS[name] = fncallback;
+};
+
 module.exports = instance;
 //# sourceMappingURL=index.js.map

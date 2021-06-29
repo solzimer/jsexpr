@@ -8,9 +8,69 @@ var EVALS = require('./evals.js'),
     Mingo = require("mingo");
 
 function instance(token) {
-	var RX = new RegExp('\\' + token + '\\{[^\\}]+\\}', 'g'); // /\$\{[^\}]+\}/g;
-	var RX_RPL_PARSE = new RegExp('\\' + token + '\\{([^\\}]+)\\}'); // /\$\{([^\}]+)\}/;
-	var RX_RPL_TOKEN = new RegExp('\\' + token + '\\{|\\}', 'g'); // /\$\{|\}/g;
+	var RX = new RegExp('\\' + token + '\\{[^\\}]+\\}', 'g');
+	var RX_RPL_PARSE = new RegExp('\\' + token + '\\{([^\\}]+)\\}');
+	var RX_RPL_TOKEN = new RegExp('\\' + token + '\\{|\\}', 'g');
+	var RX_FILTER = new RegExp('^[A-Z_]+\\:');
+
+	var FILTERS = {
+		JSON: function (_JSON) {
+			function JSON(_x) {
+				return _JSON.apply(this, arguments);
+			}
+
+			JSON.toString = function () {
+				return _JSON.toString();
+			};
+
+			return JSON;
+		}(function (args) {
+			var nexpr = args[1];
+			var spaces = args[2];
+			if (args.length == 2) {
+				if (isNaN(nexpr)) {
+					spaces = 2;
+				} else {
+					nexpr = 'this';spaces = args[1];
+				}
+			} else if (args.length == 1) {
+				nexpr = 'this';
+				spaces = 2;
+			}
+			spaces = parseInt(spaces);
+			var fnxpr = tokens("${" + nexpr + "}");
+			return function (entry) {
+				return JSON.stringify(fnxpr(entry), null, spaces);
+			};
+		}),
+		DATE: function DATE(args) {
+			args.shift();
+			var nexpr = tokens("${" + args.shift() + "}");
+			var format = args.join(":").split('|');
+			return function (entry) {
+				var res = nexpr(entry);
+				var dt = dayjs(res, format[0]);
+				if (format[1]) {
+					return dt.format(format[1]);
+				} else {
+					return dt.toDate();
+				}
+			};
+		},
+		SUBSTR: function SUBSTR(args) {
+			args.shift();
+			var nexpr = tokens("${" + args.shift() + "}");
+			var format = args.join(":").split('|');
+			var start = parseInt(format[0]);
+			var end = parseInt(format[1]);
+			if (isNaN(start)) start = 0;
+			if (isNaN(end)) end = undefined;
+			return function (entry) {
+				var res = nexpr(entry);
+				return _typeof(res == 'string') ? res.substring(start, end) : res;
+			};
+		}
+	};
 
 	function fnassign(path) {
 		return eval('(function(path){\n\t\t\treturn function(obj,val) {\n\t\t\t\ttry {\n\t\t\t\t\t// Ensure path\n\t\t\t\t\tlet root = obj;\n\t\t\t\t\tlet kpath = path.split(\'.\');\n\t\t\t\t\tfor(let i=0; i<kpath.length;i++) {\n\t\t\t\t\t\tlet k = kpath[i];\n\t\t\t\t\t\tif(!root[k]) root[k] = {};\n\t\t\t\t\t\troot = root[k];\n\t\t\t\t\t}\n\t\n\t\t\t\t\treturn obj.' + path + ' = val;\n\t\t\t\t}catch(err) {}\n\t\t\t}\n\t\t})(\'' + path + '\')');
@@ -45,51 +105,18 @@ function instance(token) {
 			expr = expr.substring(idx + token.length);
 			list.push(t);
 
-			// JSON Formatter
-			if (rtoken.startsWith('JSON:')) {
-				var parts = rtoken.split(":");
-				var nexpr = parts[1];
-				var spaces = parts[2];
-				if (parts.length == 2) {
-					if (isNaN(nexpr)) {
-						spaces = 2;
-					} else {
-						nexpr = 'this';spaces = parts[1];
-					}
-				} else if (parts.length == 1) {
-					nexpr = 'this';
-					spaces = 2;
-				}
-				spaces = parseInt(spaces);
-				var fnxpr = tokens("${" + nexpr + "}");
-				var fn = function fn(entry) {
-					return JSON.stringify(fnxpr(entry), null, spaces);
-				};
+			// Filter
+			if (RX_FILTER.test(rtoken)) {
+				var args = rtoken.split(":");
+				var fn = FILTERS[args[0]](args);
 				list.push(fn);
 			}
-			// Date Formatter
-			else if (rtoken.startsWith('DATE:')) {
-					var _parts = rtoken.split(":");
-					_parts.shift();
-					var _nexpr = exprfn("${" + _parts.shift() + "}");
-					var format = _parts.join(":").split('|');
-					var _fn = function _fn(entry) {
-						var res = _nexpr(entry);
-						var dt = dayjs(res, format[0]);
-						if (format[1]) {
-							return dt.format(format[1]);
-						} else {
-							return dt.toDate();
-						}
-					};
-					list.push(_fn);
+			// Evaluator
+			else {
+					list.push(function (entry) {
+						return method(entry, rtoken);
+					});
 				}
-				// Evaluator
-				else {
-						list.push(function (entry) {
-							return method(entry, rtoken);
-						});
-					}
 		});
 
 		list.push(expr);
@@ -193,13 +220,18 @@ function instance(token) {
 		}
 	}
 
+	function filter(name, fncallback) {
+		FILTERS[name] = fncallback;
+	}
+
 	return {
 		fn: parse,
 		eval: parse,
 		assign: fnassign,
 		expr: exprfn,
 		expression: exprfn,
-		traverse: traverse
+		traverse: traverse,
+		filter: filter
 	};
 }
 

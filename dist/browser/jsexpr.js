@@ -99,9 +99,69 @@ var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbo
         Mingo = require("mingo");
 
     function instance(token) {
-      var RX = new RegExp("\\" + token + "\\{[^\\}]+\\}", 'g'); // /\$\{[^\}]+\}/g;
-      var RX_RPL_PARSE = new RegExp("\\" + token + "\\{([^\\}]+)\\}"); // /\$\{([^\}]+)\}/;
-      var RX_RPL_TOKEN = new RegExp("\\" + token + "\\{|\\}", 'g'); // /\$\{|\}/g;
+      var RX = new RegExp("\\" + token + "\\{[^\\}]+\\}", 'g');
+      var RX_RPL_PARSE = new RegExp("\\" + token + "\\{([^\\}]+)\\}");
+      var RX_RPL_TOKEN = new RegExp("\\" + token + "\\{|\\}", 'g');
+      var RX_FILTER = new RegExp("^[A-Z_]+\\:");
+
+      var FILTERS = {
+        JSON: function (_JSON) {
+          function JSON(_x) {
+            return _JSON.apply(this, arguments);
+          }
+
+          JSON.toString = function () {
+            return _JSON.toString();
+          };
+
+          return JSON;
+        }(function (args) {
+          var nexpr = args[1];
+          var spaces = args[2];
+          if (args.length == 2) {
+            if (isNaN(nexpr)) {
+              spaces = 2;
+            } else {
+              nexpr = 'this';spaces = args[1];
+            }
+          } else if (args.length == 1) {
+            nexpr = 'this';
+            spaces = 2;
+          }
+          spaces = parseInt(spaces);
+          var fnxpr = tokens("${" + nexpr + "}");
+          return function (entry) {
+            return JSON.stringify(fnxpr(entry), null, spaces);
+          };
+        }),
+        DATE: function DATE(args) {
+          args.shift();
+          var nexpr = tokens("${" + args.shift() + "}");
+          var format = args.join(":").split('|');
+          return function (entry) {
+            var res = nexpr(entry);
+            var dt = dayjs(res, format[0]);
+            if (format[1]) {
+              return dt.format(format[1]);
+            } else {
+              return dt.toDate();
+            }
+          };
+        },
+        SUBSTR: function SUBSTR(args) {
+          args.shift();
+          var nexpr = tokens("${" + args.shift() + "}");
+          var format = args.join(":").split('|');
+          var start = parseInt(format[0]);
+          var end = parseInt(format[1]);
+          if (isNaN(start)) start = 0;
+          if (isNaN(end)) end = undefined;
+          return function (entry) {
+            var res = nexpr(entry);
+            return _typeof2(res == 'string') ? res.substring(start, end) : res;
+          };
+        }
+      };
 
       function fnassign(path) {
         return eval("(function(path){\n\t\t\treturn function(obj,val) {\n\t\t\t\ttry {\n\t\t\t\t\t// Ensure path\n\t\t\t\t\tlet root = obj;\n\t\t\t\t\tlet kpath = path.split('.');\n\t\t\t\t\tfor(let i=0; i<kpath.length;i++) {\n\t\t\t\t\t\tlet k = kpath[i];\n\t\t\t\t\t\tif(!root[k]) root[k] = {};\n\t\t\t\t\t\troot = root[k];\n\t\t\t\t\t}\n\t\n\t\t\t\t\treturn obj." + path + " = val;\n\t\t\t\t}catch(err) {}\n\t\t\t}\n\t\t})('" + path + "')");
@@ -136,51 +196,18 @@ var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbo
           expr = expr.substring(idx + token.length);
           list.push(t);
 
-          // JSON Formatter
-          if (rtoken.startsWith('JSON:')) {
-            var parts = rtoken.split(":");
-            var nexpr = parts[1];
-            var spaces = parts[2];
-            if (parts.length == 2) {
-              if (isNaN(nexpr)) {
-                spaces = 2;
-              } else {
-                nexpr = 'this';spaces = parts[1];
-              }
-            } else if (parts.length == 1) {
-              nexpr = 'this';
-              spaces = 2;
-            }
-            spaces = parseInt(spaces);
-            var fnxpr = tokens("${" + nexpr + "}");
-            var fn = function fn(entry) {
-              return JSON.stringify(fnxpr(entry), null, spaces);
-            };
+          // Filter
+          if (RX_FILTER.test(rtoken)) {
+            var args = rtoken.split(":");
+            var fn = FILTERS[args[0]](args);
             list.push(fn);
           }
-          // Date Formatter
-          else if (rtoken.startsWith('DATE:')) {
-              var _parts = rtoken.split(":");
-              _parts.shift();
-              var _nexpr = exprfn("${" + _parts.shift() + "}");
-              var format = _parts.join(":").split('|');
-              var _fn = function _fn(entry) {
-                var res = _nexpr(entry);
-                var dt = dayjs(res, format[0]);
-                if (format[1]) {
-                  return dt.format(format[1]);
-                } else {
-                  return dt.toDate();
-                }
-              };
-              list.push(_fn);
+          // Evaluator
+          else {
+              list.push(function (entry) {
+                return method(entry, rtoken);
+              });
             }
-            // Evaluator
-            else {
-                list.push(function (entry) {
-                  return method(entry, rtoken);
-                });
-              }
         });
 
         list.push(expr);
@@ -284,13 +311,18 @@ var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbo
         }
       }
 
+      function filter(name, fncallback) {
+        FILTERS[name] = fncallback;
+      }
+
       return {
         fn: parse,
         eval: parse,
         assign: fnassign,
         expr: exprfn,
         expression: exprfn,
-        traverse: traverse
+        traverse: traverse,
+        filter: filter
       };
     }
 
@@ -304,6 +336,10 @@ var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbo
       return expression(token);
     };
 
+    instance.filter = function (name, fncallback) {
+      instance.FILTERS[name] = fncallback;
+    };
+
     module.exports = instance;
   }, { "./expression": 4, "./mingo_ex": 6 }], 6: [function (require, module, exports) {
     var mingo = require('mingo'),
@@ -312,83 +348,85 @@ var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbo
     var EV_CACHE = {};
     var EX_CACHE = {};
 
-    mingo.addOperators(mingo.OP_QUERY, function (_) {
-      return {
-        $starts: function $starts(selector, value, args) {
-          args = Array.isArray(args) ? args : [args];
-          return (value || "").startsWith(args[0]);
-        },
-        $startsWith: function $startsWith(selector, value, args) {
-          args = Array.isArray(args) ? args : [args];
-          return (value || "").startsWith(args[0]);
-        },
-        $ends: function $ends(selector, value, args) {
-          args = Array.isArray(args) ? args : [args];
-          return (value || "").endsWith(args[0]);
-        },
-        $endsWith: function $endsWith(selector, value, args) {
-          args = Array.isArray(args) ? args : [args];
-          return (value || "").endsWith(args[0]);
-        },
-        $contains: function $contains(selector, value, args) {
-          args = Array.isArray(args) ? args : [args];
-          return (value || "").indexOf(args[0]) >= 0;
-        }
-      };
-    });
+    try {
+      mingo.addOperators(mingo.OP_QUERY, function (_) {
+        return {
+          $starts: function $starts(selector, value, args) {
+            args = Array.isArray(args) ? args : [args];
+            return (value || "").startsWith(args[0]);
+          },
+          $startsWith: function $startsWith(selector, value, args) {
+            args = Array.isArray(args) ? args : [args];
+            return (value || "").startsWith(args[0]);
+          },
+          $ends: function $ends(selector, value, args) {
+            args = Array.isArray(args) ? args : [args];
+            return (value || "").endsWith(args[0]);
+          },
+          $endsWith: function $endsWith(selector, value, args) {
+            args = Array.isArray(args) ? args : [args];
+            return (value || "").endsWith(args[0]);
+          },
+          $contains: function $contains(selector, value, args) {
+            args = Array.isArray(args) ? args : [args];
+            return (value || "").indexOf(args[0]) >= 0;
+          }
+        };
+      });
 
-    mingo.addOperators(mingo.OP_EXPRESSION, function (_) {
-      return {
-        $eval: function $eval(selector, value, args) {
-          if (!EV_CACHE[value]) {
-            EV_CACHE[value] = jsexpr.eval(value);
+      mingo.addOperators(mingo.OP_EXPRESSION, function (_) {
+        return {
+          $eval: function $eval(selector, value, args) {
+            if (!EV_CACHE[value]) {
+              EV_CACHE[value] = jsexpr.eval(value);
+            }
+            return EV_CACHE[value](selector);
+          },
+          $expr: function $expr(selector, value, args) {
+            if (!EX_CACHE[value]) {
+              EX_CACHE[value] = jsexpr.expr(value);
+            }
+            return EX_CACHE[value](selector);
+          },
+          $keyval: function $keyval(selector, value, args) {
+            var val = _.computeValue(selector, value);
+            return val.reduce(function (map, item) {
+              map[item[0]] = item[1] || "_";
+              return map;
+            }, {});
+          },
+          $trim: function $trim(selector, value, args) {
+            var chars = new Set((value.chars || '').split(''));
+            var val = _.computeValue(selector, value.input).split('');
+            while (chars.has(val[0])) {
+              val.shift();
+            }while (chars.has(val[val.length - 1])) {
+              val.pop();
+            }return val.join('');
+          },
+          $starts: function $starts(selector, value, args) {
+            var val = _.computeValue(selector, value[0]);
+            return (val || "").startsWith(value[1]);
+          },
+          $startsWidth: function $startsWidth(selector, value, args) {
+            var val = _.computeValue(selector, value[0]);
+            return (val || "").startsWith(value[1]);
+          },
+          $ends: function $ends(selector, value, args) {
+            var val = _.computeValue(selector, value[0]);
+            return (val || "").endsWith(value[1]);
+          },
+          $endsWith: function $endsWith(selector, value, args) {
+            var val = _.computeValue(selector, value[0]);
+            return (val || "").endsWith(value[1]);
+          },
+          $contains: function $contains(selector, value, args) {
+            var val = _.computeValue(selector, value[0]);
+            return (val || "").indexOf(value[1]) >= 0;
           }
-          return EV_CACHE[value](selector);
-        },
-        $expr: function $expr(selector, value, args) {
-          if (!EX_CACHE[value]) {
-            EX_CACHE[value] = jsexpr.expr(value);
-          }
-          return EX_CACHE[value](selector);
-        },
-        $keyval: function $keyval(selector, value, args) {
-          var val = _.computeValue(selector, value);
-          return val.reduce(function (map, item) {
-            map[item[0]] = item[1] || "_";
-            return map;
-          }, {});
-        },
-        $trim: function $trim(selector, value, args) {
-          var chars = new Set((value.chars || '').split(''));
-          var val = _.computeValue(selector, value.input).split('');
-          while (chars.has(val[0])) {
-            val.shift();
-          }while (chars.has(val[val.length - 1])) {
-            val.pop();
-          }return val.join('');
-        },
-        $starts: function $starts(selector, value, args) {
-          var val = _.computeValue(selector, value[0]);
-          return (val || "").startsWith(value[1]);
-        },
-        $startsWidth: function $startsWidth(selector, value, args) {
-          var val = _.computeValue(selector, value[0]);
-          return (val || "").startsWith(value[1]);
-        },
-        $ends: function $ends(selector, value, args) {
-          var val = _.computeValue(selector, value[0]);
-          return (val || "").endsWith(value[1]);
-        },
-        $endsWith: function $endsWith(selector, value, args) {
-          var val = _.computeValue(selector, value[0]);
-          return (val || "").endsWith(value[1]);
-        },
-        $contains: function $contains(selector, value, args) {
-          var val = _.computeValue(selector, value[0]);
-          return (val || "").indexOf(value[1]) >= 0;
-        }
-      };
-    });
+        };
+      });
+    } catch (err) {}
 
     module.exports = mingo;
   }, { "./expression": 4, "mingo": 9 }], 7: [function (require, module, exports) {
