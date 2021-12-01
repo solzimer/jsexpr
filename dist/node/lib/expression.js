@@ -137,6 +137,7 @@ function instance(token) {
 		} else {
 			return function (entry) {
 				var t = list[0];
+				if (typeof t == 'undefined') return undefined;
 				return typeof t == "string" ? t : t(entry);
 			};
 		}
