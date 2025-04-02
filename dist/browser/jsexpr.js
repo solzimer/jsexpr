@@ -136,6 +136,11 @@ var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbo
         }),
         DATE: function DATE(args) {
           args.shift();
+          if (args.length == 0) {
+            args = ["null||new Date()", '|YYYY-MM-DDTHH:mm:ss.SSSZ'];
+          } else if (args.length == 1) {
+            args = ["null||new Date()", "|" + args[0]];
+          }
           var nexpr = tokens("${" + args.shift() + "}");
           var format = args.join(":").split('|');
           return function (entry) {
