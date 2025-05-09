@@ -54,7 +54,7 @@ function instance(token) {
 			var format = args.join(":").split('|');
 			return function (entry) {
 				var res = nexpr(entry);
-				var dt = dayjs(res, format[0]);
+				var dt = dayjs(res, format[0] || undefined);
 				if (format[1]) {
 					return dt.format(format[1]);
 				} else {
